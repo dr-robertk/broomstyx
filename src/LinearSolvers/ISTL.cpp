@@ -193,6 +193,49 @@ ISTLSolver::solve ( SparseMatrix* coefMat, RealVector& rhs )
     typedef Dune::SeqILU< M, BlockVectorType, BlockVectorType > PreconditionerType;
     PreconditionerType precon( mat, 1.0, true );
 
+#if 0
+       typedef typename Dune::FieldTraits< field_type>::real_type real_type;
+        typedef typename std::conditional< std::is_convertible<field_type,real_type>::value,
+                         Dune::Amg::FirstDiagonal, Dune::Amg::RowSum >::type Norm;
+        typedef Dune::Amg::CoarsenCriterion<
+                Dune::Amg::UnSymmetricCriterion<ISTLMatrixType, Norm > > Criterion;
+
+        typedef typename Dune::Amg::SmootherTraits<Smoother>::Arguments SmootherArgs;
+
+        SmootherArgs smootherArgs;
+
+        smootherArgs.iterations = iter;
+        smootherArgs.relaxationFactor = relax ;
+
+        int coarsenTarget=1200;
+        Criterion criterion(15,coarsenTarget);
+        criterion.setDefaultValuesIsotropic(2);
+        criterion.setAlpha(.67);
+        criterion.setBeta(1.0e-8);
+        criterion.setMaxLevel(10);
+        if( verbose_ && Parameter :: verbose() )
+          criterion.setDebugLevel( 1 );
+        else
+          criterion.setDebugLevel( 0 );
+
+        /*
+        if( comm.size() > 1 )
+        {
+          typedef Dune::OwnerOverlapCopyCommunication<int> ParallelInformation;
+          ParallelInformation pinfo(MPI_COMM_WORLD);
+          typedef Dune::Amg::AMG<OperatorType, X, Smoother, ParallelInformation> AMG;
+          return new AMG(*op_, criterion, smootherArgs, pinfo);
+        }
+        else
+        */
+        {
+          // X == Y is needed for AMG
+          typedef Dune::Amg::AMG<OperatorType, X, Smoother> AMG;
+          return new AMG(*op_, criterion, smootherArgs);
+
+#endif
+
+
     Dune::BiCGSTABSolver< BlockVectorType > solver( op, precon, _tol, int(_maxIter), int(0));
 
     const int dim = rhs.dim();
