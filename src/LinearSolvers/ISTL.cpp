@@ -32,6 +32,10 @@
 #include <dune/istl/operators.hh>
 #include <dune/istl/solvers.hh>
 #include <dune/istl/preconditioners.hh>
+
+#include <dune/istl/paamg/amg.hh>
+#include <dune/istl/paamg/pinfo.hh>
+
 #include <string>
 #include "../Util/RealVector.hpp"
 #include "../SparseMatrix/ISTLMat.hpp"
